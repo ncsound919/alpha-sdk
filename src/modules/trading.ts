@@ -207,7 +207,7 @@ const createOrder = async (
 
   // Step 2: ALGO payment for escrow MBR
   const paymentTxn = await algokit.transferAlgos(
-    { from: signerAccount, to: marketAddress, amount: algokit.microAlgos(957_000), skipSending: true },
+    { from: signerAccount, to: marketAddress, amount: algokit.microAlgos(963_500), skipSending: true },
     algodClient,
   );
   atc.addTransaction({ txn: paymentTxn.transaction, signer });
