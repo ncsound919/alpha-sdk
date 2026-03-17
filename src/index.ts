@@ -1,6 +1,9 @@
 // Main client
 export { AlphaClient } from './client.js';
 
+// WebSocket client
+export { AlphaWebSocket } from './websocket.js';
+
 // All types
 export type {
   // Config
@@ -41,11 +44,22 @@ export type {
   OpenOrder,
   // Escrow
   EscrowGlobalState,
+  // WebSocket
+  AlphaWebSocketConfig,
+  WsOrderbookAggregatedEntry,
+  WsOrderbookDetailEntry,
+  WsOrderbookDetailSide,
+  WsOrderbookApp,
+  OrderbookChangedEvent,
+  MarketsChangedEvent,
+  MarketChangedEvent,
+  WalletOrdersChangedEvent,
+  WebSocketStreamEvent,
 } from './types.js';
 
 // Market discovery
 export { getMarketsOnChain, getMarketOnChain, getLiveMarketsFromApi, getMarketFromApi } from './modules/markets.js';
-export { DEFAULT_API_BASE_URL, DEFAULT_MARKET_CREATOR_ADDRESS } from './constants.js';
+export { DEFAULT_API_BASE_URL, DEFAULT_WSS_BASE_URL, DEFAULT_MARKET_CREATOR_ADDRESS } from './constants.js';
 
 // Utility functions (for advanced users)
 export { calculateFee, calculateFeeFromTotal } from './utils/fees.js';

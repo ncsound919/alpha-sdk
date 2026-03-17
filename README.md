@@ -337,6 +337,127 @@ for (const m of rewardMarkets) {
 
 ---
 
+### WebSocket Streams
+
+Real-time data streams via WebSocket. No API key or auth required. Replaces polling with push-based updates.
+
+```typescript
+import { AlphaWebSocket } from '@alpha-arcade/sdk';
+
+// Node.js 22+ and browsers — native WebSocket, nothing extra needed
+const ws = new AlphaWebSocket();
+
+// Node.js < 22 — install `ws` and pass it in:
+// npm install ws
+import WebSocket from 'ws';
+const ws = new AlphaWebSocket({ WebSocket });
+
+// Subscribe to orderbook updates (~5s snapshots)
+const unsub = ws.subscribeOrderbook('will-btc-hit-100k', (event) => {
+  console.log('Orderbook:', event.orderbook);
+});
+
+// Unsubscribe when done
+unsub();
+
+// Close the connection
+ws.close();
+```
+
+#### `subscribeLiveMarkets(callback)`
+
+Receive incremental diffs whenever market probabilities change.
+
+```typescript
+ws.subscribeLiveMarkets((event) => {
+  console.log('Markets changed at', event.ts, event);
+});
+```
+
+#### `subscribeMarket(slug, callback)`
+
+Receive change events for a single market.
+
+```typescript
+ws.subscribeMarket('will-btc-hit-100k', (event) => {
+  console.log('Market update:', event);
+});
+```
+
+#### `subscribeOrderbook(slug, callback)`
+
+Receive full orderbook snapshots on every change (~5s interval). Replaces on-chain polling.
+
+```typescript
+ws.subscribeOrderbook('will-btc-hit-100k', (event) => {
+  // Top-level bids/asks use decimal prices (cents)
+  // Nested yes/no use raw microunit prices with escrowAppId and owner
+  for (const [appId, book] of Object.entries(event.orderbook)) {
+    console.log(`App ${appId}: spread=${book.spread}`);
+    console.log('  Bids:', book.bids);
+    console.log('  Yes bids:', book.yes.bids);
+  }
+});
+```
+
+#### `subscribeWalletOrders(wallet, callback)`
+
+Receive updates when orders for a wallet are created or modified.
+
+```typescript
+ws.subscribeWalletOrders('MMU6X...', (event) => {
+  console.log('Wallet orders changed:', event);
+});
+```
+
+#### Unsubscribing
+
+Each `subscribe*` method returns an unsubscribe function. Call it to stop receiving events for that stream:
+
+```typescript
+const unsub = ws.subscribeOrderbook('my-market', (event) => { /* ... */ });
+
+// Later, stop listening
+unsub();
+```
+
+#### Control Methods
+
+```typescript
+// List active subscriptions on this connection
+const subs = await ws.listSubscriptions();
+
+// Query server properties
+const props = await ws.getProperty('heartbeat');
+```
+
+#### Configuration
+
+```typescript
+import WebSocket from 'ws'; // Only needed on Node.js < 22
+
+const ws = new AlphaWebSocket({
+  WebSocket,                                  // Pass `ws` on Node.js < 22 (not needed in browsers or Node 22+)
+  url: 'wss://custom-endpoint.example.com',   // Override default URL
+  reconnect: true,                            // Auto-reconnect (default: true)
+  maxReconnectAttempts: 10,                   // Give up after 10 retries (default: Infinity)
+  heartbeatIntervalMs: 60_000,                // Ping interval in ms (default: 60000)
+});
+```
+
+#### Connection Details
+
+| Setting | Value |
+|---------|-------|
+| Heartbeat | 60s (auto-handled) |
+| Idle timeout | 180s |
+| Rate limit | 5 messages/sec/connection |
+| Reconnect | Exponential backoff (1s → 30s max) |
+
+The client automatically responds to server pings, sends keepalive pings, and reconnects with exponential backoff on unexpected disconnects. All active subscriptions are restored after reconnect.
+
+---
+
 ### Utility Functions
 
 These are exported for advanced users:

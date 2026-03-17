@@ -416,3 +416,91 @@ export type EscrowGlobalState = {
   asset_listed?: number;
   fee_timer_start?: number;
 };
+
+// ============================================
+// WebSocket Types
+// ============================================
+
+/** Configuration for AlphaWebSocket */
+export type AlphaWebSocketConfig = {
+  /** WebSocket URL override (default: wss://wss.platform.alphaarcade.com) */
+  url?: string;
+  /** Enable auto-reconnect on unexpected disconnect (default: true) */
+  reconnect?: boolean;
+  /** Maximum reconnect attempts before giving up (default: Infinity) */
+  maxReconnectAttempts?: number;
+  /** Heartbeat interval in ms (default: 60000) */
+  heartbeatIntervalMs?: number;
+  /**
+   * WebSocket constructor to use. Defaults to the global `WebSocket`.
+   * On Node.js < 22, pass the `ws` package: `import WebSocket from 'ws'; new AlphaWebSocket({ WebSocket })`
+   */
+  WebSocket?: unknown;
+};
+
+/** Orderbook bid/ask entry at the top level (decimal cents) */
+export type WsOrderbookAggregatedEntry = {
+  price: number;
+  quantity: number;
+  total: number;
+};
+
+/** Orderbook bid/ask entry with escrow details (raw microunit prices) */
+export type WsOrderbookDetailEntry = {
+  price: number;
+  quantity: number;
+  total: number;
+  escrowAppId: number;
+  owner: string;
+};
+
+/** Per-side orderbook detail (yes or no) */
+export type WsOrderbookDetailSide = {
+  bids: WsOrderbookDetailEntry[];
+  asks: WsOrderbookDetailEntry[];
+};
+
+/** Orderbook data for a single app within the orderbook payload */
+export type WsOrderbookApp = {
+  bids: WsOrderbookAggregatedEntry[];
+  asks: WsOrderbookAggregatedEntry[];
+  spread: number;
+  yes: WsOrderbookDetailSide;
+  no: WsOrderbookDetailSide;
+};
+
+/** Payload for orderbook_changed events */
+export type OrderbookChangedEvent = {
+  type: 'orderbook_changed';
+  ts: number;
+  marketId: string;
+  orderbook: Record<string, WsOrderbookApp>;
+};
+
+/** Payload for markets_changed events (incremental diffs) */
+export type MarketsChangedEvent = {
+  type: 'markets_changed';
+  ts: number;
+  [key: string]: unknown;
+};
+
+/** Payload for market_changed events (single market) */
+export type MarketChangedEvent = {
+  type: 'market_changed';
+  ts: number;
+  [key: string]: unknown;
+};
+
+/** Payload for wallet_orders_changed events */
+export type WalletOrdersChangedEvent = {
+  type: 'wallet_orders_changed';
+  ts: number;
+  [key: string]: unknown;
+};
+
+/** Discriminated union of all WebSocket stream events */
+export type WebSocketStreamEvent =
+  | MarketsChangedEvent
+  | MarketChangedEvent
+  | OrderbookChangedEvent
+  | WalletOrdersChangedEvent;
