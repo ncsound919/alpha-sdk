@@ -376,7 +376,7 @@ ws.subscribeLiveMarkets((event) => {
 
 #### `subscribeMarket(slug, callback)`
 
-Receive change events for a single market.
+Receive change events for a single market. Uses the market **slug** (not `marketAppId`) — see note on `subscribeOrderbook` below.
 
 ```typescript
 ws.subscribeMarket('will-btc-hit-100k', (event) => {
@@ -387,6 +387,8 @@ ws.subscribeMarket('will-btc-hit-100k', (event) => {
 #### `subscribeOrderbook(slug, callback)`
 
 Receive full orderbook snapshots on every change (~5s interval). Replaces on-chain polling.
+
+**Note:** The WebSocket API uses market **slugs** (URL-friendly names like `"will-btc-hit-100k"`), not `marketAppId` numbers. You can get a market's slug from the `slug` field on `Market` objects returned by `getLiveMarkets()` or `getMarket()`.
 
 ```typescript
 ws.subscribeOrderbook('will-btc-hit-100k', (event) => {
