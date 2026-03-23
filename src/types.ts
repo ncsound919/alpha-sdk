@@ -57,6 +57,7 @@ export type Market = {
   feeBase?: number;
   /** Liquidty Rewards Info */
   totalRewards?: number;
+  totalPregameRewards?: number;
   rewardsPaidOut?: number;
   rewardsSpreadDistance?: number;
   rewardsMinContracts?: number;
@@ -76,6 +77,13 @@ export type MarketOption = {
   noAssetId: number;
   yesProb: number;
   noProb: number;
+  totalRewards?: number;
+  totalPregameRewards?: number;
+  rewardsPaidOut?: number;
+  rewardsSpreadDistance?: number;
+  rewardsMinContracts?: number;
+  lastRewardAmount?: number;
+  lastRewardTs?: number;
   [key: string]: unknown;
 };
 

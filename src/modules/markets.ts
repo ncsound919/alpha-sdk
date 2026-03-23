@@ -277,6 +277,25 @@ export const getMarketFromApi = async (
   return market;
 };
 
+type RewardedMarketLike = {
+  totalRewards?: number;
+  totalPregameRewards?: number;
+  options?: Array<{
+    totalRewards?: number;
+    totalPregameRewards?: number;
+  }>;
+};
+
+const hasRewardLiquidity = (market: RewardedMarketLike): boolean => {
+  if ((market.totalRewards ?? 0) > 0 || (market.totalPregameRewards ?? 0) > 0) {
+    return true;
+  }
+
+  return (market.options ?? []).some((option) => (
+    (option.totalRewards ?? 0) > 0 || (option.totalPregameRewards ?? 0) > 0
+  ));
+};
+
 /**
  * Fetches the reward markets from the Alpha REST API.
  * Requires an API key.
@@ -292,8 +311,8 @@ export const getRewardMarkets = async (
   }
 
   const markets = await getLiveMarketsFromApi(config);
-  return markets.filter((m: Market) => (m as any).totalRewards && (m as any).totalRewards > 0);
-  };
+  return markets.filter((market) => hasRewardLiquidity(market));
+};
 
 // ============================================
 // Smart defaults (on-chain first, API if key provided)
